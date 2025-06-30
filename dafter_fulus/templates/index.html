@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Bank Email Parser{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="jumbotron">
+            <h1 class="display-4">Bank Email Parser & Account Tracker</h1>
+            <p class="lead">Parse transaction data from bank emails and track your accounts.</p>
+            <hr class="my-4">
+            <p>Choose one of the options below to parse your bank email.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="form-section">
+            <h3>Fetch Emails</h3>
+            <form action="{% url 'fetch_emails' %}" method="post">
+                {% csrf_token %}
+                <h5 class="mt-3 mb-2">Email Connection Settings</h5>
+                <div class="mb-3">
+                    <label for="{{ email_fetch_form.email_host.id_for_label }}" class="form-label">Email Host</label>
+                    {{ email_fetch_form.email_host }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ email_fetch_form.email_port.id_for_label }}" class="form-label">Email Port</label>
+                    {{ email_fetch_form.email_port }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ email_fetch_form.email_username.id_for_label }}" class="form-label">Email Username</label>
+                    {{ email_fetch_form.email_username }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ email_fetch_form.email_password.id_for_label }}" class="form-label">Email Password</label>
+                    {{ email_fetch_form.email_password }}
+                    <div class="form-text">For Gmail, use an App Password instead of your regular password.</div>
+                </div>
+
+                <div class="mb-3 form-check">
+                    {{ email_fetch_form.email_use_ssl }}
+                    <label class="form-check-label" for="{{ email_fetch_form.email_use_ssl.id_for_label }}">Use SSL</label>
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ email_fetch_form.bank_email_addresses.id_for_label }}" class="form-label">Bank Email Addresses</label>
+                    {{ email_fetch_form.bank_email_addresses }}
+                    <div class="form-text">Comma-separated list of bank email addresses.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ email_fetch_form.bank_email_subjects.id_for_label }}" class="form-label">Bank Email Subjects</label>
+                    {{ email_fetch_form.bank_email_subjects }}
+                    <div class="form-text">Comma-separated list of keywords to look for in email subjects.</div>
+                </div>
+
+                <h5 class="mt-4 mb-2">Fetch Settings</h5>
+                <div class="mb-3">
+                    <label for="{{ email_fetch_form.folder.id_for_label }}" class="form-label">Email Folder</label>
+                    {{ email_fetch_form.folder }}
+                </div>
+
+                <div class="mb-3 form-check">
+                    {{ email_fetch_form.unread_only }}
+                    <label class="form-check-label" for="{{ email_fetch_form.unread_only.id_for_label }}">Only fetch unread emails</label>
+                </div>
+
+                <div class="mb-3 form-check">
+                    {{ email_fetch_form.save_to_db }}
+                    <label class="form-check-label" for="{{ email_fetch_form.save_to_db.id_for_label }}">Save transactions to database</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Fetch Emails</button>
+                <div class="form-text mt-2">This will connect to your email account and fetch bank emails.</div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="form-section">
+            <h3>Paste Email Content</h3>
+            <form action="{% url 'parse_email' %}" method="post">
+                {% csrf_token %}
+                {{ email_content_form.source.0 }}
+                
+                <div class="mb-3">
+                    <label for="{{ email_content_form.subject.id_for_label }}" class="form-label">Email Subject (optional)</label>
+                    {{ email_content_form.subject }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ email_content_form.from_email.id_for_label }}" class="form-label">From (optional)</label>
+                    {{ email_content_form.from_email }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ email_content_form.email_content.id_for_label }}" class="form-label">Email Content *</label>
+                    {{ email_content_form.email_content }}
+                    <div class="form-text">Paste the full email content including headers and body.</div>
+                    {% if email_content_form.email_content.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ email_content_form.email_content.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3 form-check">
+                    {{ email_content_form.save_to_db }}
+                    <label class="form-check-label" for="{{ email_content_form.save_to_db.id_for_label }}">Save transaction to database</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Parse Email</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="form-section">
+            <h3>Upload Email File</h3>
+            <form action="{% url 'parse_email' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ email_content_form.source.1 }}
+
+                <div class="mb-3">
+                    <label for="{{ email_content_form.from_email.id_for_label }}" class="form-label">From (optional)</label>
+                    {{ email_content_form.from_email }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ email_content_form.email_file.id_for_label }}" class="form-label">Email File *</label>
+                    {{ email_content_form.email_file }}
+                    <div class="form-text">Upload a text file containing the email content.</div>
+                    {% if email_content_form.email_file.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ email_content_form.email_file.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3 form-check">
+                    {{ email_content_form.save_to_db }}
+                    <label class="form-check-label" for="{{ email_content_form.save_to_db.id_for_label }}">Save transaction to database</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Parse Email</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3>Instructions</h3>
+            </div>
+            <div class="card-body">
+                <h5>How to use this tool:</h5>
+                <ol>
+                    <li>Choose one of the options above:
+                        <ul>
+                            <li><strong>Fetch Emails</strong>: Connect directly to your email account and fetch bank emails</li>
+                            <li><strong>Paste Email Content</strong>: Manually paste email content</li>
+                            <li><strong>Upload Email File</strong>: Upload a text file containing email content</li>
+                        </ul>
+                    </li>
+                    <li>The parser will extract transaction data from the email(s).</li>
+                    <li>You'll see the extracted data on the results page.</li>
+                    <li>Optionally, you can save the transaction(s) to the database for tracking.</li>
+                </ol>
+
+                <h5>Supported Banks:</h5>
+                <ul>
+                    <li>Bank Muscat</li>
+                </ul>
+
+                <h5>Supported Transaction Types:</h5>
+                <ul>
+                    <li>Income (money received)</li>
+                    <li>Expense (money spent)</li>
+                    <li>Transfer (money moved between accounts)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

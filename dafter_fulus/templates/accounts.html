@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Accounts - Bank Email Parser{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mb-4">Account Summaries</h1>
+        
+        {% if summaries %}
+            <div class="row">
+                {% for summary in summaries %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>{{ summary.account.account_number }}</h3>
+                                <h6 class="text-muted">{{ summary.account.bank_name }}</h6>
+                            </div>
+                            <div class="card-body">
+                                <h4 class="mb-3">Balance: {{ summary.net_balance }} {{ summary.account.currency }}</h4>
+                                
+                                <h5>Transaction Summary</h5>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Count</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="badge bg-success">Income</span></td>
+                                            <td>{{ summary.transactions|selectattr("transaction_type", "equalto", "income")|list|length }}</td>
+                                            <td>{{ summary.total_income }} {{ summary.account.currency }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge bg-danger">Expense</span></td>
+                                            <td>{{ summary.transactions|selectattr("transaction_type", "equalto", "expense")|list|length }}</td>
+                                            <td>{{ summary.total_expense }} {{ summary.account.currency }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge bg-info">Transfer</span></td>
+                                            <td>{{ summary.transactions|selectattr("transaction_type", "equalto", "transfer")|list|length }}</td>
+                                            <td>N/A</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <p class="text-muted mt-3">Last updated: {{ summary.account.updated_at|date:"Y-m-d H:i:s" }}</p>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{% url 'account_details' account_number=summary.account.account_number %}" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <h4 class="alert-heading">No accounts found!</h4>
+                <p>You don't have any accounts in the database yet. Parse some bank emails to create accounts.</p>
+                <hr>
+                <p class="mb-0">
+                    <a href="{% url 'index' %}" class="btn btn-primary">Parse Email</a>
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
